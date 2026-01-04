@@ -1,25 +1,38 @@
 # sentiment
 
-A small sandbox repo for experimenting with sentiment analysis workflows.
+A server-side sentiment + trend aggregator that monitors a small allowlist of public sources (RSS + Reddit, optionally X) and produces a unified, de-duplicated stream of “items” with sentiment scores and rolling aggregates.
 
-## Goals
+This project is designed to:
+- Pull fresh items on a schedule (polling).
+- Normalize them into a common schema.
+- Score sentiment per item (lexicon/model).
+- Store and serve results for a  dashboard/API.
 
-- Provide a clean place to prototype sentiment scoring and evaluation.
-- Keep examples small and reproducible.
+## Features
 
-## Suggested structure
+- **Multi-source ingestion**
+  - RSS feeds (e.g., finance/news headlines)
+  - Reddit Data API: `/r/{sub}/new` (script app credentials)
+  - Optional: X search API
+  - Other (confifurable) Public Market feeds
 
-- `src/` — library / core logic
-- `scripts/` — one-off experiments
-- `data/` — local datasets (generally gitignored)
-- `tests/` — unit tests
+- **Normalization**
+  - Converts each source into a single `ScoredItem` schema:
+    - `id`, `source`, `text`, `url`, `ts_utc`, `sentiment`, optional `topic`
 
-## Getting started
+- **Spam reduction**
+  - Reddit: optional `text_only` mode (keeps self-posts only)
+  - X: recommended `-has:links` when you want to drop link spam
 
-1. Create a virtual environment (recommended).
-2. Add your first implementation under `src/`.
-3. Add a simple CLI or script under `scripts/`.
+- **Aggregation**
+  - Rolling statistics per topic (mean sentiment, volume, “hotness”)
 
-## License
+## Requirements
 
-Add a license when you’re ready to publish/distribute code.
+- C++17+
+- `cpp-httplib` (HTTPS enabled)
+- `nlohmann/json`
+
+If using HTTPS with `cpp-httplib`, ensure OpenSSL support is enabled.
+
+
